@@ -12,8 +12,11 @@ import { STEP_NAME } from "./steps";
 import { IVote } from "./vote";
 
 interface PlayerWithRole {
-  player: unknown;
+  player: string;
   role: ICharacterRole;
+  teammates: Array<string>;
+  unsorted: Array<string>;
+  enemies: Array<string>;
 }
 
 interface IMoveAdventure {
@@ -113,13 +116,15 @@ export class Game {
     };
   }
 
-  getAdventureFailCount(){
-    return this.adventureHistory.filter((outcome) => outcome === RoundOutcome.Fail).length
+  getAdventureFailCount() {
+    return this.adventureHistory.filter(
+      (outcome) => outcome === RoundOutcome.Fail
+    ).length;
   }
 
-  private endGame(){
+  private endGame() {
     // this.winner = '';
-    this.nextMove= {step: STEP_NAME.GameOver}
+    this.nextMove = { step: STEP_NAME.GameOver };
     this.isGameInProgress = false;
   }
 
@@ -127,19 +132,19 @@ export class Game {
     if (this.isAdventureVoteComplete()) {
       this.adventureHistory[this.adventure - 1] =
         this.getRoundOutcome().outcome;
-        this.adventure++;
-        this.currentRoundPlayer = this.getNextPlayer();
-        this.selectedAdventurePlayers = [];
-        this.adventureVotes.clear();
-        if(this.getAdventureFailCount() === 3) {
-          this.endGame();
-        } else {
-          this.nextMove = {
-            step: STEP_NAME.ChooseAdventurePlayers,
-            player: this.currentRoundPlayer,
-            votes: this.getNumberOfAdventurers(),
-          };
-        }
+      this.adventure++;
+      this.currentRoundPlayer = this.getNextPlayer();
+      this.selectedAdventurePlayers = [];
+      this.adventureVotes.clear();
+      if (this.getAdventureFailCount() === 3) {
+        this.endGame();
+      } else {
+        this.nextMove = {
+          step: STEP_NAME.ChooseAdventurePlayers,
+          player: this.currentRoundPlayer,
+          votes: this.getNumberOfAdventurers(),
+        };
+      }
     }
   }
 
@@ -234,7 +239,7 @@ export class Game {
     if (playersFor > playersAgainst) {
       this.goToNextMove();
     } else {
-        this.nextRound();
+      this.nextRound();
     }
   }
 
@@ -248,7 +253,7 @@ export class Game {
 
   private goToNextMove() {
     this.adventureApprovalVotes.clear();
-    if(this.currentRound === 5) {
+    if (this.currentRound === 5) {
       this.nextMove = {
         step: STEP_NAME.AdventureOutcomeVoting,
         votes: [],
@@ -297,11 +302,42 @@ export class Game {
       playersWithRoles.push({
         player: player,
         role: roles[index],
+        enemies: [],
+        teammates: [],
+        unsorted: [],
       });
     });
 
+    
     this.playersWithRoles = playersWithRoles;
+    this.updateSpecialRoles();
     this.roles = roles;
+  }
+
+  private updateSpecialRoles() {
+    const morganaPlayer = this.playersWithRoles.find(
+      (playerWithRole) => playerWithRole.role.name === new Morgana().name
+    )!;
+    const merlinPlayer = this.playersWithRoles.find(
+      (playerWithRole) => playerWithRole.role.name === new Merlin().name
+    )!;
+    const percivalPlayer = this.playersWithRoles.find(
+      (playerWithRole) => playerWithRole.role.name === new Percival().name
+    )!;
+    const evilPlayers = this.playersWithRoles.filter(
+      (playerWithRole) => playerWithRole.role.team === "evil"
+    )!;
+    merlinPlayer.enemies = evilPlayers
+      .filter((evilPlayer) => evilPlayer.role.name !== new Mordred().name)
+      .map((playerWithRole) => playerWithRole.player);
+    percivalPlayer.unsorted = [morganaPlayer?.player, merlinPlayer?.player];
+    evilPlayers.forEach((evilPlayer) => {
+      evilPlayer.teammates = [];
+      if (evilPlayer.role.name === new Oberon().name) return;
+      evilPlayers.forEach((evilPlayerInner) => {
+        evilPlayer.teammates.push(evilPlayerInner.player);
+      });
+    });
   }
 
   private getGameRoles(numOfPlayers: number): Array<ICharacterRole> {
@@ -337,17 +373,16 @@ export class Game {
     }
     throw new Error("Invalid logic exception");
   }
-
-  
 }
 
 // https://bost.ocks.org/mike/shuffle/
 function shuffle(array: Array<unknown>) {
-  var m = array.length, t, i;
+  var m = array.length,
+    t,
+    i;
 
   // While there remain elements to shuffle…
   while (m) {
-
     // Pick a remaining element…
     i = Math.floor(Math.random() * m--);
 
