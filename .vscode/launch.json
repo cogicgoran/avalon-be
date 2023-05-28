@@ -6,12 +6,22 @@
   "configurations": [
     {
       "type": "node",
-      "port": 3000,
-      "request": "attach",
-      "name": "Attach debugger",
+      "request": "launch",
+      "name": "Debug application",
       "skipFiles": [
         "<node_internals>/**"
       ],
+      "program": "${workspaceFolder}\\src\\main.ts",
+      "runtimeArgs": ["-r", "ts-node/register", "-r", "tsconfig-paths/register"],
+      "console": "integratedTerminal",
+      "outFiles": ["${workspaceFolder}/**/*.js"],
+      // "env": { "NODE_ENV": "development" },
+      // "resolveSourceMapLocations": [
+      //   "${workspaceFolder}/**",
+      //   "!**/node_modules/**"
+      // ],
+      // "preLaunchTask": "prepare app to debug",
+      // "postDebugTask": "clean app after debug"
     }
   ]
 }

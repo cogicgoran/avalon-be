@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "`The Resistance: Avalon` pits the forces of Good and Evil in a battle to control the future of civilization. Arthur represents the future of Britain, a promise of prosperity and honor, yet hidden among his brave warriors are Mordred's unscrupulous minions. These forces of evil are few in number but have knowledge of each other and remain hidden from all but one of Arthur's servants. Merlin alone knows the agents of evil, but he must speak of this only in riddles. If his true identity is discovered, all will be lost.",
   "scripts": {
-    "start": "ts-node src/main.ts"
+    "start": "ts-node src/main.ts",
+    "build": "tsc src/main.ts --esModuleInterop"
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,10 @@
     "@types/express": "^4.17.17",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "socket.io": "^4.6.1"
+    "socket.io": "^4.6.1",
+    "ts-node": "^10.9.1"
+  },
+  "devDependencies": {
+    "tsconfig-paths": "^4.2.0"
   }
 }
