@@ -112,6 +112,27 @@ io.on("connection", (socket) => {
     } catch (error) {}
   });
 
+  socket.on("guessMerlin", (gameId: unknown, player: string) => {
+    const game = liveGames.get(gameId as any);
+    console.log('[Merlin guess]:', gameId, player);
+    try {
+      if (!game) throw new Error("Game not found");
+      // const adventureNumberBeforeMove = game.adventure;
+      // game.setPlayerVote(player, vote);
+      game.guessMerlin(player)
+      io.emit("merlinGuessResult", undefined, game)
+      // if(game.adventure !== adventureNumberBeforeMove) {
+      //   // All players have voted
+      //   io.emit('adventureVoteUpdate', game)
+      //   // TODO: handle
+      // } else {
+      //   io.emit('adventureVoteUpdate', game)
+      // }
+    } catch (error) {
+      socket.emit("merlinGuessResult", error);
+    }
+  });
+
   socket.on("disconnect", () => {
     //
   });

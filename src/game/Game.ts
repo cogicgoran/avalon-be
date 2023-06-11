@@ -1,3 +1,4 @@
+import { shuffle } from "../utils";
 import {
   Assassin,
   ICharacterRole,
@@ -59,9 +60,23 @@ export class Game {
   currentRoundPlayer!: string;
   adventureApprovalVotes: Map<string, boolean> = new Map();
   currentRound!: number; // adventure has at most 5 rounds
+  winner:  "evil"| "good" | null= null;
 
   constructor(gameId: number) {
     this.id = gameId;
+  }
+
+  guessMerlin(playerName: string) {
+    const player = this.players.find((player) =>  player === playerName);
+    if(this.nextMove.step !== STEP_NAME.GuessMerlin) throw new Error('Bad request');
+    if(!player) throw new Error("Bad request");
+    const nameMerlin = new Merlin().name;
+    if(this.playersWithRoles.find((playerWithRole) =>  playerWithRole.player === player && playerWithRole.role.name === nameMerlin)) {
+      this.endGame("evil");
+    } else {
+      this.endGame("good");
+    }
+
   }
 
   start() {
@@ -90,7 +105,6 @@ export class Game {
   }
 
   isAdventureVoteComplete() {
-    console.log(this.adventureVotes);
     return this.adventureVotes.size === this.getNumberOfAdventurers();
   }
 
@@ -122,8 +136,14 @@ export class Game {
     ).length;
   }
 
-  private endGame() {
-    // this.winner = '';
+  getAdventureSuccessCount() {
+    return this.adventureHistory.filter(
+      (outcome) => outcome === RoundOutcome.Success
+    ).length;
+  }
+
+  private endGame(team: "evil" | "good") {
+    this.winner = team;
     this.nextMove = { step: STEP_NAME.GameOver };
     this.isGameInProgress = false;
   }
@@ -137,7 +157,13 @@ export class Game {
       this.selectedAdventurePlayers = [];
       this.adventureVotes.clear();
       if (this.getAdventureFailCount() === 3) {
-        this.endGame();
+        this.endGame("evil");
+      } if(this.getAdventureSuccessCount() === 3) {
+        this.nextMove = {
+          step: STEP_NAME.GuessMerlin,
+          player: this.playersWithRoles.find((player) => player.role.name === new Mordred().name),
+          // playersToVote: this.playersWithRoles.filter((player) => player.role.team === 'evil'), // TODO: allow other evil players to mark the guessed player
+        };
       } else {
         this.nextMove = {
           step: STEP_NAME.ChooseAdventurePlayers,
@@ -373,24 +399,4 @@ export class Game {
     }
     throw new Error("Invalid logic exception");
   }
-}
-
-// https://bost.ocks.org/mike/shuffle/
-function shuffle(array: Array<unknown>) {
-  var m = array.length,
-    t,
-    i;
-
-  // While there remain elements to shuffle…
-  while (m) {
-    // Pick a remaining element…
-    i = Math.floor(Math.random() * m--);
-
-    // And swap it with the current element.
-    t = array[m];
-    array[m] = array[i];
-    array[i] = t;
-  }
-
-  return array;
 }

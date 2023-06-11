@@ -6,7 +6,6 @@ const TEAM = {
 export interface ICharacterRole {
   team: (typeof TEAM)[keyof typeof TEAM];
   name: string;
-
 }
 
 export class Merlin implements ICharacterRole {
