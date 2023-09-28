@@ -61,6 +61,26 @@ export class Game {
   adventureApprovalVotes: Map<string, boolean> = new Map();
   currentRound!: number; // adventure has at most 5 rounds
   winner:  "evil"| "good" | null= null;
+  adventurersPerAdventure!: Array<number>;
+  static playerRoundAdventureMap: Map<number, Map<number, number>> = new Map().set(
+    5,
+    new Map().set(1, 2).set(2, 3).set(3, 2).set(4, 3).set(5, 3)
+  ).set(
+    6,
+    new Map().set(1, 2).set(2, 3).set(3, 4).set(4, 3).set(5, 4)
+  ).set(
+    7,
+    new Map().set(1, 2).set(2, 3).set(3, 3).set(4, 4).set(5, 4)
+  ).set(
+    8,
+    new Map().set(1, 3).set(2, 4).set(3, 4).set(4, 5).set(5, 5)
+  ).set(
+    9,
+    new Map().set(1, 3).set(2, 4).set(3, 4).set(4, 5).set(5, 5)
+  ).set(
+    10,
+    new Map().set(1, 3).set(2, 4).set(3, 4).set(4, 5).set(5, 5)
+  );
 
   constructor(gameId: number) {
     this.id = gameId;
@@ -98,6 +118,7 @@ export class Game {
       player: this.currentRoundPlayer,
       votes: this.getNumberOfAdventurers(),
     };
+    this.adventurersPerAdventure = Array.from(Game.playerRoundAdventureMap.get(this.players.length)?.values()!)
   }
 
   isTwoVoteFailRequired() {
@@ -189,33 +210,7 @@ export class Game {
   }
 
   private getNumberOfAdventurers(): number {
-    const playerRoundAdventureMap: Map<number, Map<number, number>> = new Map();
-    playerRoundAdventureMap.set(
-      5,
-      new Map().set(1, 2).set(2, 3).set(3, 2).set(4, 3).set(5, 3)
-    );
-    playerRoundAdventureMap.set(
-      6,
-      new Map().set(1, 2).set(2, 3).set(3, 4).set(4, 3).set(5, 4)
-    );
-    playerRoundAdventureMap.set(
-      7,
-      new Map().set(1, 2).set(2, 3).set(3, 3).set(4, 4).set(5, 4)
-    );
-    playerRoundAdventureMap.set(
-      8,
-      new Map().set(1, 3).set(2, 4).set(3, 4).set(4, 5).set(5, 5)
-    );
-    playerRoundAdventureMap.set(
-      9,
-      new Map().set(1, 3).set(2, 4).set(3, 4).set(4, 5).set(5, 5)
-    );
-    playerRoundAdventureMap.set(
-      10,
-      new Map().set(1, 3).set(2, 4).set(3, 4).set(4, 5).set(5, 5)
-    );
-
-    return playerRoundAdventureMap
+    return  Game.playerRoundAdventureMap
       .get(this.players.length)
       ?.get(this.adventure)!;
   }
